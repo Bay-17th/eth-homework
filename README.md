@@ -7,6 +7,7 @@
 - [빠른 시작](#빠른-시작)
 - [주차별 과제](#주차별-과제)
 - [제출 방법](#제출-방법)
+- [네트워크 연결](#네트워크-연결)
 - [도움 받기](#도움-받기)
 
 ## 빠른 시작
@@ -96,6 +97,68 @@ git push -u origin username/week-01
 GitHub에서 Pull Request를 생성합니다. PR 템플릿에 따라 배운 점과 어려웠던 점을 작성해주세요.
 
 자세한 제출 가이드는 [CONTRIBUTING.md](./CONTRIBUTING.md)를 참조하세요.
+
+## 네트워크 연결
+
+Foundry는 로컬 테스트뿐만 아니라 Sepolia, 메인넷 등 실제 네트워크에도 연결할 수 있습니다.
+
+### Foundry 도구 소개
+
+| 도구 | 설명 |
+|------|------|
+| `forge` | 컴파일, 테스트, 배포 |
+| `cast` | 온체인 데이터 조회, 트랜잭션 전송 |
+| `anvil` | 로컬 테스트넷 실행 |
+| `chisel` | Solidity REPL |
+
+### 로컬 테스트넷 (Anvil)
+
+```bash
+# 로컬넷 실행
+anvil
+
+# 다른 터미널에서 배포
+forge script script/Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
+```
+
+### 테스트넷 연결 (Sepolia)
+
+1. [Infura](https://infura.io), [Alchemy](https://alchemy.com) 등에서 무료 API 키 발급
+
+2. `.env` 파일 설정:
+   ```bash
+   cp .env.example .env
+   # .env 파일에 API 키와 프라이빗 키 입력
+   ```
+
+3. 배포:
+   ```bash
+   forge script script/Deploy.s.sol \
+     --rpc-url https://sepolia.infura.io/v3/YOUR_API_KEY \
+     --private-key YOUR_PRIVATE_KEY \
+     --broadcast
+   ```
+
+4. 컨트랙트 조회:
+   ```bash
+   cast call 0x컨트랙트주소 "balanceOf(address)" 0x지갑주소 \
+     --rpc-url https://sepolia.infura.io/v3/YOUR_API_KEY
+   ```
+
+### foundry.toml RPC 설정 (선택사항)
+
+`foundry.toml`에 RPC 엔드포인트를 설정하면 편리합니다:
+
+```toml
+[rpc_endpoints]
+sepolia = "https://sepolia.infura.io/v3/${INFURA_API_KEY}"
+mainnet = "https://mainnet.infura.io/v3/${INFURA_API_KEY}"
+```
+
+이후 간단히 사용:
+```bash
+forge script script/Deploy.s.sol --rpc-url sepolia --broadcast
+```
 
 ## 도움 받기
 
