@@ -13,6 +13,8 @@ contract Counter {
     /// @dev public으로 선언하면 자동으로 getter 함수가 생성됩니다
     uint256 public count;
 
+    error CountCannotGoBelowZero();
+
     // ============================================================
     // 읽기 함수 (View Functions)
     // ============================================================
@@ -32,6 +34,7 @@ contract Counter {
     function increment() public {
         // TODO: count를 1 증가시키세요
         // 힌트: count += 1; 또는 count = count + 1; 또는 count++;
+        count += 1;
     }
 
     /// @notice 카운트를 1 감소시킵니다
@@ -40,6 +43,13 @@ contract Counter {
         // TODO: count를 1 감소시키세요. 단, count가 0이면 revert해야 합니다.
         // 힌트: require(조건, "에러 메시지"); 를 사용하세요
         // 힌트: require(count > 0, "Count cannot go below zero");
+
+        //error event 를 통해 에러 원인을 파악한다. 근데 이러면 if-else 로 인한 코드가 늘어나 가스비가 더 는다. 하지만, 에러 이벤트 파악하기좋아서 구조에따라 사용된다.
+        // if (count <= 0) {
+        //     revert CountCannotGoBelowZero();
+        // }
+        require(count > 0, "Count cannot go below zero");
+        count -= 1;
     }
 
     /// @notice 카운트를 0으로 초기화합니다
@@ -47,5 +57,6 @@ contract Counter {
     function reset() public {
         // TODO: count를 0으로 초기화하세요
         // 힌트: count = 0;
+        count = 0;
     }
 }
