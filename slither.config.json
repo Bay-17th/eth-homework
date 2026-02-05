@@ -1,0 +1,7 @@
+{
+  "detectors_to_exclude": "naming-convention,solc-version,pragma",
+  "exclude_informational": true,
+  "exclude_optimization": true,
+  "filter_paths": "lib/,node_modules/",
+  "fail_on": "none"
+}

@@ -1,0 +1,26 @@
+# Foundry
+cache
+out
+out-via-ir
+lcov.info
+
+# Config
+.env
+
+# IDE
+.vscode
+.idea
+.DS_Store
+
+# Keep gitkeep files
+!/**/.gitkeep
+
+# Broadcast (keep testnet, ignore local)
+broadcast/*/*/**
+
+# CI artifacts
+node_modules/
+*.sarif
+
+# npm
+package-lock.json

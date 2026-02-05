@@ -1,0 +1,138 @@
+name: Homework CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  security-events: write
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  # Job 1: Auto-label based on file paths (CI-04)
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job 2: Solidity linting (CI-01)
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run solhint
+        id: solhint
+        run: |
+          npx solhint 'week-*/dev/src/**/*.sol' -f sarif -o solhint.sarif || true
+          npx solhint 'week-*/dev/src/**/*.sol' -f stylish
+        continue-on-error: true
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: solhint.sarif
+          category: solhint
+
+  # Job 3: Format check (CI-02)
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Check Prettier formatting
+        id: prettier
+        run: npx prettier --check 'week-*/dev/src/**/*.sol'
+        continue-on-error: true
+
+  # Job 4: Foundry tests (CI-03)
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run forge build
+        run: forge build
+      - name: Run forge tests
+        id: test
+        run: forge test -vvv
+        continue-on-error: true
+
+  # Job 5: Security scan with Slither (CI-05)
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Foundry (for compilation)
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Run Slither
+        uses: crytic/slither-action@v0.4.2
+        id: slither
+        with:
+          sarif: slither.sarif
+          fail-on: none
+          slither-args: --exclude-informational --exclude-optimization
+        continue-on-error: true
+      - name: Upload Slither SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: ${{ steps.slither.outputs.sarif }}
+          category: slither
+
+  # Job 6: Korean feedback summary (CI-06)
+  feedback:
+    needs: [lint, format, test, security]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate Korean feedback summary
+        run: |
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          ## 숙제 제출 CI 결과
+
+          | 항목 | 상태 | 설명 |
+          |------|------|------|
+          | 린트 검사 | ${{ needs.lint.result == 'success' && '✅ 통과' || '⚠️ 검토 필요' }} | 코드 스타일 및 잠재적 문제 검사 |
+          | 포맷 검사 | ${{ needs.format.result == 'success' && '✅ 통과' || '⚠️ 수정 필요' }} | 코드 형식 일관성 검사 |
+          | 테스트 | ${{ needs.test.result == 'success' && '✅ 통과' || '❌ 실패' }} | 스마트 컨트랙트 기능 테스트 |
+          | 보안 검토 | ${{ needs.security.result == 'success' && '✅ 이상 없음' || '🛡️ 검토 필요' }} | 보안 취약점 분석 |
+
+          ---
+
+          ### 다음 단계
+
+          - **모두 통과**: PR 리뷰를 기다려주세요 👍
+          - **검토 필요**: 위 항목들을 클릭하여 상세 내용을 확인하세요
+          - **도움 필요**: Slack #eth-homework 채널에 질문해주세요
+
+          ---
+          <sub>자동 생성된 피드백입니다. 문제가 있으면 멘토에게 문의하세요.</sub>
+          EOF

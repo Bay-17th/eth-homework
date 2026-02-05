@@ -1,0 +1,21 @@
+[profile.default]
+src = "."
+test = "."
+out = "out"
+libs = ["lib"]
+solc = "0.8.26"
+
+# Optimizer for gas efficiency
+optimizer = true
+optimizer_runs = 200
+
+# Format settings
+[fmt]
+line_length = 100
+tab_width = 4
+bracket_spacing = true
+
+# CI profile for GitHub Actions
+[profile.ci]
+verbosity = 3
+fuzz = { runs = 256 }

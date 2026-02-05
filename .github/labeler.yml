@@ -1,0 +1,38 @@
+# PR Auto-Labeling Configuration
+# Used by actions/labeler@v5 to automatically add labels based on changed files
+# See: https://github.com/actions/labeler
+
+# Week labels (applies when PR changes files in week-N folder)
+# Note: Folder names use zero-padded format (week-01), labels use single digit (week-1)
+week-1:
+  - changed-files:
+    - any-glob-to-any-file: 'week-01/**/*'
+
+week-2:
+  - changed-files:
+    - any-glob-to-any-file: 'week-02/**/*'
+
+week-3:
+  - changed-files:
+    - any-glob-to-any-file: 'week-03/**/*'
+
+week-4:
+  - changed-files:
+    - any-glob-to-any-file: 'week-04/**/*'
+
+week-5:
+  - changed-files:
+    - any-glob-to-any-file: 'week-05/**/*'
+
+week-6:
+  - changed-files:
+    - any-glob-to-any-file: 'week-06/**/*'
+
+# Type labels (applies based on subfolder)
+theory:
+  - changed-files:
+    - any-glob-to-any-file: '**/theory/**/*'
+
+dev:
+  - changed-files:
+    - any-glob-to-any-file: '**/dev/**/*'

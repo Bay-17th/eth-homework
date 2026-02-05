@@ -1,0 +1,15 @@
+{
+  "name": "eth-homework",
+  "private": true,
+  "devDependencies": {
+    "solhint": "^5.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-solidity": "^2.0.0"
+  },
+  "scripts": {
+    "lint": "solhint 'week-*/dev/src/**/*.sol'",
+    "lint:fix": "solhint 'week-*/dev/src/**/*.sol' --fix",
+    "format": "prettier --check 'week-*/dev/src/**/*.sol'",
+    "format:fix": "prettier --write 'week-*/dev/src/**/*.sol'"
+  }
+}
