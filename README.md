@@ -33,6 +33,11 @@ cd eth-homework
    forge install
    ```
 
+   > **Note:** `--recurse-submodules` 옵션 없이 클론한 경우, forge-std 라이브러리를 수동으로 설치해야 합니다:
+   > ```bash
+   > forge install foundry-rs/forge-std
+   > ```
+
 3. 빌드 테스트:
    ```bash
    forge build
