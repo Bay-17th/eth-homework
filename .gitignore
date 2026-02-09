@@ -23,4 +23,4 @@ node_modules/
 *.sarif
 
 # npm
-package-lock.json
+# package-lock.json — CI에서 필요하므로 추적
