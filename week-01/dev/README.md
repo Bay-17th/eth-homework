@@ -20,7 +20,7 @@
 ```
 week-01/dev/
 ├── src/
-│   └── Counter.sol      # 과제 파일 (TODO를 구현하세요)
+│   └── Counter.sol      # 과제 파일 (TODO를 구현하세요) 
 ├── test/
 │   └── Counter.t.sol    # 테스트 파일 (수정하지 마세요)
 ├── script/
