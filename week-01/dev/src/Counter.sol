@@ -22,7 +22,6 @@ contract Counter {
     function getCount() public view returns (uint256) {
         return count;
     }
-
     // ============================================================
     // 쓰기 함수 (State-Changing Functions)
     // ============================================================
@@ -31,8 +30,6 @@ contract Counter {
     /// @dev count 값을 1만큼 증가시키는 로직을 구현하세요
     function increment() public {
 	count += 1;
-        // TODO: count를 1 증가시키세요
-        // 힌트: count += 1; 또는 count = count + 1; 또는 count++;
     }
 
     /// @notice 카운트를 1 감소시킵니다
@@ -40,16 +37,11 @@ contract Counter {
     function decrement() public {
 	require(count > 0, "Count cannot go below zero");
 	count -= 1; 
-        // TODO: count를 1 감소시키세요. 단, count가 0이면 revert해야 합니다.
-        // 힌트: require(조건, "에러 메시지"); 를 사용하세요
-        // 힌트: require(count > 0, "Count cannot go below zero");
     }
 
     /// @notice 카운트를 0으로 초기화합니다
     /// @dev count 값을 0으로 설정하는 로직을 구현하세요
     function reset() public {
 	count = 0;
-        // TODO: count를 0으로 초기화하세요
-        // 힌트: count = 0;
     }
 }
