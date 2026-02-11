@@ -34,8 +34,8 @@ function count() public view returns (uint256) {
 ```
 
 **답변:**
-- `public`:
-- `view`:
+- `public`: 어디에서든 호출이 가능하다는 의미이다.
+- `view`: 상태 변수를 읽기만 하고 변경하지 않는다는 뜻이다.
 
 ---
 
@@ -44,7 +44,7 @@ function count() public view returns (uint256) {
 Solidity에서 상태 변수(state variable)와 지역 변수(local variable)의 차이점을 설명하세요.
 
 **답변:**
-[여기에 답변을 작성하세요]
+상태 변수는 블록체인에 영구 저장되며 가스비가 발생한다. 반면 지역 변수는 함수 실행 중에만 존재하며 가스비가 적게 발생한다.
 
 ---
 
