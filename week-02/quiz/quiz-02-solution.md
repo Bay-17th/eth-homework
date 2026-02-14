@@ -23,10 +23,9 @@ C) 둘 다 같은 의미이며 호환되어 사용된다
 D) gasLimit이 높을수록 트랜잭션이 빨리 처리된다
 
 **답변:**
-<!--
-정답과 함께, "총 가스 비용"을 계산하는 공식을 설명하세요.
-예: 어떤 값들을 곱하면 실제 비용이 나오나요?
--->
+B
+트랜잭션 fee = 실제 gas 사용량 * gasPrice
+만약 트랜잭션 fee가 gaslimit보다 높으면 에러가 발생한다.
 
 
 ---
@@ -50,9 +49,8 @@ C) 두 트랜잭션이 동시에 처리된다
 D) 둘 다 실패하고 Alice의 계정이 잠긴다
 
 **답변:**
-<!--
-정답과 함께, 왜 nonce 순서가 gasPrice보다 우선하는지 설명하세요.
--->
+B
+gasPrice가 TX-B에서 더 높지만, nonce의 규칙이 더 우선이다. 즉 트랜잭션 순서 번호인 nonce가 순서의 무결성 및 이중 지불 방지 역할을 하므로 TX-A가 먼저 처리되어야 TX-B가 처리된다.
 
 
 ---
@@ -68,11 +66,9 @@ C) 부인 방지 (Non-repudiation)
 D) 암호화 (Encryption)
 
 **답변:**
-<!--
-정답과 함께, 나머지 두 속성(인증, 무결성, 부인 방지 중)이
-각각 무엇을 보장하는지 간단히 설명하세요.
--->
-
+B
+인증 : 송신자의 신원을 확인한다.
+부인 방지 : 사후에 참여자들의 행위의 대해 사실 부인을 방지한다.
 
 ---
 
@@ -87,11 +83,10 @@ C) Private Key -> Public Key -> Address 순으로 유도되며, 역방향은 불
 D) 세 값은 독립적으로 생성되며 서로 연관이 없다
 
 **답변:**
-<!--
-정답과 함께, "왜 역방향이 불가능한지" 간단히 설명하세요.
-힌트: 수학적 난이도 관점에서 생각해 보세요.
--->
-
+C
+타원곡선 문제의 난이도: 공개키에서 개인키를 알아내려면 이산 로그 문제를 풀어야 하지만 극도로 높은 난이도로 사실상 불가능에 가깝다.
+해시 함수의 일방성: 주소를 만들 때 사용하는 해시 함수는 결과값(주소)을 보고 입력값(공개키)을 유추하는 것이 아예 불가능하도록 설계된 수학적 장치다.
+물론 주소와 달리 개인키가 유출되면 모든 권한을 탈취 당한다.
 
 ---
 
@@ -102,12 +97,9 @@ D) 세 값은 독립적으로 생성되며 서로 연관이 없다
 만약 nonce가 없다면 어떤 공격이 가능해질까요? 구체적인 예시와 함께 설명하세요.
 
 **답변:**
-<!--
-2-3 문장으로 설명하세요.
-힌트: "재사용 공격"이란 무엇일까요?
-누군가가 당신의 서명된 트랜잭션을 복사해서 여러 번 보내면?
--->
-
+nonce가 필요한 가장 결정적인 이유는 동일한 트랜잭션이 중복해서 실행되는 것을 방지하기 위해서다.
+만약 Nonce가 없다면, 공격자가 네트워크에 이미 공개된 사용자의 유효한 서명을 그대로 복사하여 반복적으로 전송하는 재전송 공격이 가능해진다.
+즉, 공격자는 해당 공격으로 지갑 주소의 잔액을 전부 전송하는등의 행위가 가능해진다. 
 
 ---
 
@@ -118,10 +110,8 @@ D) 세 값은 독립적으로 생성되며 서로 연관이 없다
 **왜** Private Key 유출이 이렇게 치명적인가요? 은행 계좌 비밀번호 유출과 비교해서 설명하세요.
 
 **답변:**
-<!--
-2-3 문장으로 설명하세요.
-힌트: 은행은 이상 거래 취소가 가능합니다. 블록체인은?
--->
+블록체인은 중앙 통제 기관이 부재한 특징을 가진다. 따라서 개인키가 유출되는 즉시 공격자가 해당 계정의 유일하고 절대적인 소유권을 갖게 되며, 한 번 실행된 탈취 거래는 그 누구도 되돌리거나 강제로 막을 수 없기 때문에 치명적이다.
+은행 계좌 비밀번호 유출 시 은행 내부 시스템이 감지 후 차단을 할 수 있지만, 블록체인은 그것이 불가능하다.
 
 
 ---
@@ -133,12 +123,10 @@ EIP-1559 이전과 이후의 가스 수수료 메커니즘의 가장 큰 차이�
 **힌트:** `baseFee`와 `priorityFee`의 역할을 설명하면서 답변하세요.
 
 **답변:**
-<!--
-2-3 문장으로 설명하세요.
-이전: 가스 가격을 사용자가 직접 설정
-이후: 어떤 부분이 달라졌나요?
--->
+EIP-1559 이전에는 사용자가 입찰하듯 gasPrice를 직접 설정하는 경매방식이었으나, 이후에는 네트워크 수요에 따라 자동으로 결정되는 baseFee와 검증자에게 주는 보너스인 priorityFee로 이원화되었다.
 
+baseFee : 블록에 포함되기 위해 지불해야 하는 최소한의 비용이다. 이 수수료는 채굴자에게 가지 않고 소각되어 이더리움의 공급량을 줄이는 경제적 효과를 낸다.
+priorityFee : 내가 전송한 트랜잭션을 남들보다 먼저 처리해달라고 검증자에게 주는 보너스다.
 
 ---
 
@@ -165,10 +153,14 @@ contract SimpleStorageTest is Test {
 
     function test_DepositUpdatesBalance() public {
         // Arrange: user 관점에서 실행
-        _______________________;  // TODO: user로 전환하는 코드
+        vm.prank(user);  // TODO: user로 전환하는 코드
 
         // Act: 1 ETH 입금
-        _______________________;  // TODO: 1 ether를 입금하는 코드
+        storage_.deposit{value: 1 ether}();  // TODO: 1 ether를 입금하는 코드
+
+        // low-level call
+        // (bool success,) = storage_.call{value: 1 ehter}("");
+        // require(success, "error");
 
         // Assert: 잔액 확인
         assertEq(storage_.getBalance(user), ______);  // TODO: 예상 잔액
@@ -178,15 +170,19 @@ contract SimpleStorageTest is Test {
 
 **답변:**
 ```solidity
-// 빈칸을 채운 완성 코드를 작성하세요
+// Arrange: user 관점에서 실행
+vm.prank(user);  // TODO: user로 전환하는 코드
+
+// Act: 1 ETH 입금
+storage_.deposit{value: 1 ether}();  // TODO: 1 ether를 입금하는 코드
+
+// low-level call
+// (bool success,) = storage_.call{value: 1 ehter}("");
+// require(success, "error");
 ```
 
 **왜 이렇게 작성했나요:**
-<!--
-각 빈칸에 대해 왜 그 코드를 선택했는지 설명하세요.
-특히 vm.prank와 {value: ...} 구문의 의미를 설명해 주세요.
--->
-
+vm.prank로 external call의 msg.sender를 다음 주소로 설정하는 코드다. 즉, user를 msg.sender로 설정한다는 뜻이고, value는 전송하는 이더의 양으로 1 ether로 표현하기도 하지만 단순히 숫자만 입력하기도 한다. 숫자만 입력했을때는 wei단위로 전송된다.
 
 ---
 
@@ -204,6 +200,9 @@ contract Wallet {
     }
 
     function withdraw(uint256 amount) public {
+        // 잔액 검증 로직 추가
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        
         // 잔액 차감
         balances[msg.sender] -= amount;
 
@@ -214,21 +213,24 @@ contract Wallet {
 ```
 
 **1) 발견한 문제점:**
-<!--
-어떤 검증이 빠져 있나요?
--->
-
+잔액을 검증하는 로직이 없다. 언더플로우 문제를 야기할 수 있다.
 
 **2) 왜 이것이 문제인가:**
-<!--
-이 상태로 withdraw(100 ether)를 호출하면 어떻게 될까요?
-힌트: 잔액이 1 ether밖에 없는 경우를 생각해 보세요.
--->
+언더플로우 에러가 발생하여 트랜잭션이 즉시 취소된다. solidity 0.8.0미만 버전이면 type(uint256).max - 99의 잔액으로 계산되는 문제가 발생 할 수 있다.
 
 
 **3) 올바른 수정 방법:**
 ```solidity
-// GOOD CODE - 수정된 withdraw 함수를 작성하세요
+function withdraw(uint256 amount) public {
+    // 잔액 검증 로직 추가
+    require(balances[msg.sender] >= amount, "Insufficient balance");
+        
+    // 잔액 차감
+    balances[msg.sender] -= amount;
+
+    // ETH 전송
+    payable(msg.sender).transfer(amount);
+}
 ```
 
 ---
@@ -246,6 +248,7 @@ contract SimpleStorageTest is Test {
     }
 
     function test_WithdrawFails() public {
+
         // 입금 없이 바로 출금 시도
         storage_.withdraw(1 ether);
     }
@@ -258,14 +261,22 @@ contract SimpleStorageTest is Test {
 <!--
 왜 실패할까요? 어떤 require 조건에 걸릴까요?
 -->
+존재하지 않은 잔액을 출금 시 부족으로 인해 에러가 발생한다. 
+```solidity
+require(balances[msg.sender] >= amount, "Insufficient balance");
+```
 
 
 **질문 2:** 이 테스트를 "출금 실패를 테스트하는 정상 테스트"로 바꾸려면 어떻게 수정해야 하나요?
 
 **답변:**
 ```solidity
-// 힌트: vm.expectRevert를 사용하세요
-// 수정된 테스트 코드를 작성하세요
+function test_WithdrawFails() public {
+    // 에러 감지 추가
+    vm.expectRevert("Insufficient balance");
+    // 입금 없이 바로 출금 시도
+    storage_.withdraw(1 ether);
+}
 ```
 
 ---
