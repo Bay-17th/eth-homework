@@ -52,6 +52,11 @@ contract SimpleStorage {
         // 힌트:
         // balances[msg.sender] += msg.value;
         // emit Deposited(msg.sender, msg.value);
+
+        //컨트랙트 내부 저장소에 잔액을 변경
+        balances[msg.sender] += msg.value;
+        // 외부세계가 변화를 빠르게 감지하기위해 emit을 씀 가스도 듬(매우 조금)
+        emit Deposited(msg.sender,msg.value);
     }
 
     /// @notice ETH를 출금합니다
@@ -69,5 +74,14 @@ contract SimpleStorage {
         // balances[msg.sender] -= amount;
         // payable(msg.sender).transfer(amount);
         // emit Withdrawn(msg.sender, amount);
+
+        // require을 통해 에러 처리 인출량이 더 적어야하므로
+        require(balances[msg.sender]>=amount,"Insufficient balance");
+        // 실제로 계좌의 잔액을 줄여주는 로직
+        balances[msg.sender]-=amount;
+        //호출한 sender에게 돈을 돌려줌(인출)
+        payable(msg.sender).transfer(amount);
+        //이것도 emit 외부세계가 인출을 빠르게 감지
+        emit Withdrawn(msg.sender, amount);
     }
 }
