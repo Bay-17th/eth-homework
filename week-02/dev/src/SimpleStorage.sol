@@ -52,6 +52,8 @@ contract SimpleStorage {
         // 힌트:
         // balances[msg.sender] += msg.value;
         // emit Deposited(msg.sender, msg.value);
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender, msg.value);
     }
 
     /// @notice ETH를 출금합니다
@@ -69,5 +71,9 @@ contract SimpleStorage {
         // balances[msg.sender] -= amount;
         // payable(msg.sender).transfer(amount);
         // emit Withdrawn(msg.sender, amount);
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
+        emit Withdrawn(msg.sender, amount);
     }
 }
