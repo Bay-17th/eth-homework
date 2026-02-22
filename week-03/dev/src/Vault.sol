@@ -107,7 +107,9 @@ contract Vault {
         // ========================================
         // 이 줄에 도달하기 전에 위의 call()에서 재진입이 발생하면
         // 공격자는 balances가 업데이트되기 전에 반복 출금 가능
-        balances[msg.sender] -= amount;
+        unchecked {
+            balances[msg.sender] -= amount;
+        }
 
         // 출금 이벤트 발생
         emit Withdrawn(msg.sender, amount);
