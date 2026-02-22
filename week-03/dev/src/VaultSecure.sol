@@ -22,21 +22,6 @@ pragma solidity 0.8.26;
 /// 2. Effects: 상태 변경 (balances 업데이트)
 /// 3. Interactions: 외부 호출 (call, transfer)
 ///
-/// 예시:
-/// ```solidity
-/// function withdraw(uint256 amount) public {
-///     // Checks
-///     require(balances[msg.sender] >= amount, "Insufficient balance");
-///
-///     // Effects (상태 먼저 변경!)
-///     balances[msg.sender] -= amount;
-///
-///     // Interactions (외부 호출은 마지막!)
-///     (bool success, ) = msg.sender.call{value: amount}("");
-///     require(success, "Transfer failed");
-/// }
-/// ```
-///
 /// ============================================
 /// 선택 2: OpenZeppelin ReentrancyGuard
 /// ============================================
@@ -83,9 +68,6 @@ contract VaultSecure {
     /// @dev 사용자별 예치금 잔액
     mapping(address => uint256) public balances;
 
-    /// @dev 재진입 방지 락
-    bool private _locked;
-
     // ============================================
     // 이벤트
     // ============================================
@@ -109,8 +91,7 @@ contract VaultSecure {
     ///
     /// 힌트: Vault.sol의 deposit()과 동일하게 구현하면 됩니다
     function deposit() public payable {
-        balances[msg.sender] += msg.value;
-        emit Deposited(msg.sender, msg.value);
+        // TODO: 구현하세요
     }
 
     /// @notice 예치한 ETH를 출금합니다
@@ -129,23 +110,7 @@ contract VaultSecure {
     /// CEI 패턴 사용 시 순서: Checks -> Effects -> Interactions
     /// ReentrancyGuard 사용 시: nonReentrant modifier 추가
     function withdraw(uint256 amount) public {
-        // Reentrancy guard - 재진입 시 조용히 리턴
-        if (_locked) return;
-        _locked = true;
-
-        // Checks
-        require(balances[msg.sender] >= amount, "Insufficient balance");
-
-        // Effects (상태 먼저 변경!)
-        balances[msg.sender] -= amount;
-
-        // Interactions (외부 호출은 마지막!)
-        (bool success,) = msg.sender.call{value: amount}("");
-        require(success, "Transfer failed");
-
-        emit Withdrawn(msg.sender, amount);
-
-        _locked = false;
+        // TODO: 구현하세요
     }
 
     // ============================================
