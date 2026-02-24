@@ -22,21 +22,6 @@ pragma solidity 0.8.26;
 /// 2. Effects: 상태 변경 (balances 업데이트)
 /// 3. Interactions: 외부 호출 (call, transfer)
 ///
-/// 예시:
-/// ```solidity
-/// function withdraw(uint256 amount) public {
-///     // Checks
-///     require(balances[msg.sender] >= amount, "Insufficient balance");
-///
-///     // Effects (상태 먼저 변경!)
-///     balances[msg.sender] -= amount;
-///
-///     // Interactions (외부 호출은 마지막!)
-///     (bool success, ) = msg.sender.call{value: amount}("");
-///     require(success, "Transfer failed");
-/// }
-/// ```
-///
 /// ============================================
 /// 선택 2: OpenZeppelin ReentrancyGuard
 /// ============================================
