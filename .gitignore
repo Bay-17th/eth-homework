@@ -24,3 +24,6 @@ node_modules/
 
 # npm
 # package-lock.json — CI에서 필요하므로 추적
+
+# OpenZeppelin (keep local, do not track in git)
+lib/openzeppelin-contracts/
