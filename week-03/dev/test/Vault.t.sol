@@ -62,6 +62,19 @@ contract Attacker {
         }
     }
 
+/*  Attacker에서 try-catch로 두번째 withdraw()의 실패를 receive단에서 흡수해 첫 withdraw()로 전파하지 않도록 해야 테스트 통과 가능
+    receive() external payable {
+        if (attackCount < 5) {
+            attackCount++;
+            try vault.withdraw(attackAmount) {
+                // 성공하면 로그 등 처리
+            } catch {
+                // 실패하면 그냥 무시하고 종료
+            }
+        }
+}
+*/
+
     /// @notice 공격자가 탈취한 ETH 확인
     function getBalance() external view returns (uint256) {
         return address(this).balance;
@@ -310,10 +323,11 @@ contract VaultSecureTest is Test {
         );
 
         // Attacker는 자신이 입금한 1 ETH만 돌려받음
-        // 10 ETH (초기) - 1 ETH (입금) + 1 ETH (정상 출금) = 10 ETH
+        // 10 ETH (초기) + 1 ETH (테스트에서 받음) - 1 ETH (vault 입금) + 1 ETH (정상 출금) = 11 ETH
+        // 즉, vault에서 추가로 탈취한 ETH는 없음
         assertEq(
             address(attacker).balance,
-            attackerBalanceBefore,
+            attackerBalanceBefore + 1 ether,
             "Attacker should only get back their deposited amount"
         );
 
