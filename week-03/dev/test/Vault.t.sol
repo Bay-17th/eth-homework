@@ -62,7 +62,8 @@ contract Attacker {
         }
     }
 
-/*  Attacker에서 try-catch로 두번째 withdraw()의 실패를 receive단에서 흡수해 첫 withdraw()로 전파하지 않도록 해야 테스트 통과 가능
+//Attacker에서 try-catch로 두번째 withdraw()의 실패를 receive단에서 흡수해 첫 withdraw()로 전파하지 않도록 해야 테스트 통과 가능
+/*
     receive() external payable {
         if (attackCount < 5) {
             attackCount++;
