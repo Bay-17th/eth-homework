@@ -78,6 +78,8 @@ pragma solidity 0.8.26;
 contract VaultSecure {
     // ============================================
     // 상태 변수
+    //락 변수
+    bool private locked = false;
     // ============================================
 
     /// @dev 사용자별 예치금 잔액
@@ -107,6 +109,8 @@ contract VaultSecure {
     /// 힌트: Vault.sol의 deposit()과 동일하게 구현하면 됩니다
     function deposit() public payable {
         // TODO: 구현하세요
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender,msg.value);
     }
 
     /// @notice 예치한 ETH를 출금합니다
@@ -126,6 +130,20 @@ contract VaultSecure {
     /// ReentrancyGuard 사용 시: nonReentrant modifier 추가
     function withdraw(uint256 amount) public {
         // TODO: 구현하세요
+        //락을 건다.
+        if (locked) return;
+        locked= true;
+        // 잔액확인
+        require(balances[msg.sender] >=amount,"Insufficient balance");
+        // 잔액부터 감소
+        balances[msg.sender] -= amount;
+        // 출금로직
+        (bool success,) = msg.sender.call{value:amount}("");
+        require (success,"Transfer failed");
+        // 출금 이벤트 생성
+        emit Withdrawn(msg.sender,amount);
+        // 락을 푼다.
+        locked = false;
     }
 
     // ============================================
