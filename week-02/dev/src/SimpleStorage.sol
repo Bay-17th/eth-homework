@@ -48,7 +48,10 @@ contract SimpleStorage {
         // TODO: 입금 로직을 구현하세요
         // 1. balances[msg.sender]에 msg.value를 더합니다
         // 2. Deposited 이벤트를 발생시킵니다
-        //
+        
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender, msg.value);
+
         // 힌트:
         // balances[msg.sender] += msg.value;
         // emit Deposited(msg.sender, msg.value);
@@ -63,7 +66,11 @@ contract SimpleStorage {
         // 2. balances[msg.sender]에서 amount를 뺍니다
         // 3. msg.sender에게 ETH를 전송합니다
         // 4. Withdrawn 이벤트를 발생시킵니다
-        //
+        
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
+        emit Withdrawn(msg.sender, amount);
         // 힌트:
         // require(balances[msg.sender] >= amount, "Insufficient balance");
         // balances[msg.sender] -= amount;
@@ -71,3 +78,31 @@ contract SimpleStorage {
         // emit Withdrawn(msg.sender, amount);
     }
 }
+
+/**
+예시 :
+
+1. 초기 상태:
+
+    Alice: 10 ETH
+    Bob:   5 ETH
+    Contract(SimpleStorage): 0 ETH
+
+    balances[Alice] = 0
+    balances[Bob]   = 0
+
+2. Alice가 3 ETH 입금:
+
+    to: 0xC
+    value: 3 ETH
+    data: deposit()
+
+3. 실행 후:
+
+    Alice: 7 ETH              (10 - 3)
+    Contract: 3 ETH
+
+    balances[Alice] = 3
+    balances[Bob]   = 0
+
+ */
