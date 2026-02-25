@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
-
 /// @title VaultSecure (안전한 버전)
 /// @author Bay-17th Ethereum Study
 /// @notice 이 컨트랙트를 CEI 패턴 또는 ReentrancyGuard로 구현하세요
@@ -75,11 +74,11 @@ pragma solidity 0.8.26;
 // import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @dev ReentrancyGuard 사용 시: contract VaultSecure is ReentrancyGuard
-contract VaultSecure {
+contract VaultSecure{
     // ============================================
     // 상태 변수
-    // ============================================
-
+    // ===========================================
+    bool private locked = false; // CEI 패턴에서 재진입 방지용 락 변수
     /// @dev 사용자별 예치금 잔액
     mapping(address => uint256) public balances;
 
@@ -107,6 +106,9 @@ contract VaultSecure {
     /// 힌트: Vault.sol의 deposit()과 동일하게 구현하면 됩니다
     function deposit() public payable {
         // TODO: 구현하세요
+        balances[msg.sender] += msg.value;
+
+        emit Deposited(msg.sender, msg.value);
     }
 
     /// @notice 예치한 ETH를 출금합니다
@@ -126,6 +128,16 @@ contract VaultSecure {
     /// ReentrancyGuard 사용 시: nonReentrant modifier 추가
     function withdraw(uint256 amount) public {
         // TODO: 구현하세요
+        if(locked) {
+            return;
+        }
+        locked = true; // 재진입 방지 락 설정
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] -= amount;
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "Transfer failed");
+        emit Withdrawn(msg.sender, amount);
+        locked = false; // 락 해제
     }
 
     // ============================================
