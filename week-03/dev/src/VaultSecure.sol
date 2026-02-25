@@ -59,9 +59,9 @@ pragma solidity 0.8.26;
 /// 어떤 방법을 선택할까?
 /// ============================================
 ///
-/// CEI 패턴:
 /// - 장점: 가스 효율적, 외부 의존성 없음
 /// - 단점: 개발자가 순서를 직접 관리해야 함
+/// CEI 패턴:
 ///
 /// ReentrancyGuard:
 /// - 장점: 실수 방지, 명시적, 검증된 코드
@@ -72,7 +72,6 @@ pragma solidity 0.8.26;
 // ============================================
 // OpenZeppelin 사용 시 주석 해제
 // ============================================
-// import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @dev ReentrancyGuard 사용 시: contract VaultSecure is ReentrancyGuard
 contract VaultSecure {
@@ -107,6 +106,8 @@ contract VaultSecure {
     /// 힌트: Vault.sol의 deposit()과 동일하게 구현하면 됩니다
     function deposit() public payable {
         // TODO: 구현하세요
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender, msg.value);
     }
 
     /// @notice 예치한 ETH를 출금합니다
@@ -126,6 +127,13 @@ contract VaultSecure {
     /// ReentrancyGuard 사용 시: nonReentrant modifier 추가
     function withdraw(uint256 amount) public {
         // TODO: 구현하세요
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+
+        balances[msg.sender] -= amount;
+        emit Withdrawn(msg.sender, amount);
+
+        (bool success, ) = msg.sender.call{ value: amount }("");
+        require(success, "Transfer failed");
     }
 
     // ============================================

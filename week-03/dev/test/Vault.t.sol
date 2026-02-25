@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {Test, console} from "forge-std/Test.sol";
-import {Vault} from "../src/Vault.sol";
-import {VaultSecure} from "../src/VaultSecure.sol";
+import { Test, console } from "forge-std/Test.sol";
+import { Vault } from "../src/Vault.sol";
+import { VaultSecure } from "../src/VaultSecure.sol";
 
 /// @title VaultTest
 /// @author Bay-17th Ethereum Study
@@ -44,7 +44,7 @@ contract Attacker {
         attackCount = 0;
 
         // 1. 정상적으로 입금
-        vault.deposit{value: msg.value}();
+        vault.deposit{ value: msg.value }();
 
         // 2. 출금 시도 - 이 때 receive()가 트리거됨
         vault.withdraw(msg.value);
@@ -120,7 +120,7 @@ contract VaultSecureTest is Test {
 
         // Act (실행)
         vm.prank(alice);
-        vault.deposit{value: 1 ether}();
+        vault.deposit{ value: 1 ether }();
 
         // Assert (검증)
         // Alice의 balances가 1 ether인지 확인
@@ -135,7 +135,7 @@ contract VaultSecureTest is Test {
 
         // Act
         vm.prank(alice);
-        vault.deposit{value: 1 ether}();
+        vault.deposit{ value: 1 ether }();
 
         // Assert
         assertEq(
@@ -155,7 +155,7 @@ contract VaultSecureTest is Test {
 
         // Act
         vm.prank(alice);
-        vault.deposit{value: 1 ether}();
+        vault.deposit{ value: 1 ether }();
 
         // Assert는 expectEmit이 자동으로 처리
     }
@@ -165,8 +165,8 @@ contract VaultSecureTest is Test {
     function test_Deposit_AccumulatesBalance() public {
         // Arrange & Act
         vm.startPrank(alice);
-        vault.deposit{value: 1 ether}();
-        vault.deposit{value: 2 ether}();
+        vault.deposit{ value: 1 ether }();
+        vault.deposit{ value: 2 ether }();
         vm.stopPrank();
 
         // Assert
@@ -182,7 +182,7 @@ contract VaultSecureTest is Test {
     function test_Withdraw_DecreasesUserBalance() public {
         // Arrange
         vm.startPrank(alice);
-        vault.deposit{value: 3 ether}();
+        vault.deposit{ value: 3 ether }();
         uint256 balanceBefore = vault.balances(alice);
 
         // Act
@@ -190,7 +190,11 @@ contract VaultSecureTest is Test {
         vm.stopPrank();
 
         // Assert
-        assertEq(vault.balances(alice), balanceBefore - 1 ether, "User balance should decrease after withdraw");
+        assertEq(
+            vault.balances(alice),
+            balanceBefore - 1 ether,
+            "User balance should decrease after withdraw"
+        );
     }
 
     /// @notice 출금 시 사용자에게 ETH가 전송되는지 테스트
@@ -198,7 +202,7 @@ contract VaultSecureTest is Test {
     function test_Withdraw_TransfersEtherToUser() public {
         // Arrange
         vm.startPrank(alice);
-        vault.deposit{value: 3 ether}();
+        vault.deposit{ value: 3 ether }();
         uint256 aliceBalanceBefore = address(alice).balance;
 
         // Act
@@ -218,7 +222,7 @@ contract VaultSecureTest is Test {
     function test_Withdraw_EmitsWithdrawnEvent() public {
         // Arrange
         vm.prank(alice);
-        vault.deposit{value: 3 ether}();
+        vault.deposit{ value: 3 ether }();
 
         // 이벤트 발생 예상 설정
         vm.expectEmit(true, false, false, true);
@@ -234,7 +238,7 @@ contract VaultSecureTest is Test {
     function test_RevertWhen_WithdrawExceedsBalance() public {
         // Arrange
         vm.prank(alice);
-        vault.deposit{value: 1 ether}();
+        vault.deposit{ value: 1 ether }();
 
         // Act & Assert
         vm.prank(alice);
@@ -272,7 +276,7 @@ contract VaultSecureTest is Test {
 
         // Bob이 먼저 5 ETH 입금 (선량한 사용자)
         vm.prank(bob);
-        vault.deposit{value: 5 ether}();
+        vault.deposit{ value: 5 ether }();
 
         console.log("=== Before Attack ===");
         console.log("Vault balance:", address(vault).balance);
@@ -290,7 +294,7 @@ contract VaultSecureTest is Test {
         // 1. 1 ETH 입금
         // 2. 1 ETH 출금 시도
         // 3. receive()에서 추가 출금 시도 (재진입)
-        attacker.attack{value: 1 ether}();
+        attacker.attack{ value: 1 ether }();
 
         console.log("=== After Attack ===");
         console.log("Vault balance:", address(vault).balance);
@@ -328,14 +332,18 @@ contract VaultSecureTest is Test {
     function test_ReentrancyAttack_AttackerGetsOnlyOwnDeposit() public {
         // Arrange
         vm.prank(bob);
-        vault.deposit{value: 5 ether}();
+        vault.deposit{ value: 5 ether }();
 
         // Act
-        attacker.attack{value: 2 ether}();
+        attacker.attack{ value: 2 ether }();
 
         // Assert
         // Attacker의 vault 잔액은 0이어야 함 (정상 출금 완료)
-        assertEq(vault.balances(address(attacker)), 0, "Attacker balance in vault should be 0 after withdraw");
+        assertEq(
+            vault.balances(address(attacker)),
+            0,
+            "Attacker balance in vault should be 0 after withdraw"
+        );
 
         // Bob의 vault 잔액은 그대로 5 ETH
         assertEq(vault.balances(bob), 5 ether, "Bob's balance should be intact");
@@ -349,10 +357,10 @@ contract VaultSecureTest is Test {
     function test_GetBalance_ReturnsContractBalance() public {
         // Arrange
         vm.prank(alice);
-        vault.deposit{value: 3 ether}();
+        vault.deposit{ value: 3 ether }();
 
         vm.prank(bob);
-        vault.deposit{value: 2 ether}();
+        vault.deposit{ value: 2 ether }();
 
         // Act
         uint256 balance = vault.getBalance();
@@ -384,13 +392,13 @@ contract VaultVulnerableTest is Test {
     function test_VulnerableVault_CanBeDrained() public {
         // Arrange
         vm.prank(bob);
-        vulnerableVault.deposit{value: 5 ether}();
+        vulnerableVault.deposit{ value: 5 ether }();
 
         console.log("=== Vulnerable Vault Before Attack ===");
         console.log("Vault balance:", address(vulnerableVault).balance);
 
         // Act - 공격!
-        attackerVulnerable.attack{value: 1 ether}();
+        attackerVulnerable.attack{ value: 1 ether }();
 
         console.log("=== Vulnerable Vault After Attack ===");
         console.log("Vault balance:", address(vulnerableVault).balance);
@@ -399,7 +407,9 @@ contract VaultVulnerableTest is Test {
         // Assert
         // 취약한 Vault는 완전히 drain됨!
         assertEq(
-            address(vulnerableVault).balance, 0, "Vulnerable vault should be completely drained by reentrancy attack"
+            address(vulnerableVault).balance,
+            0,
+            "Vulnerable vault should be completely drained by reentrancy attack"
         );
 
         // 공격자가 Bob의 ETH까지 탈취
@@ -417,7 +427,7 @@ contract AttackerForVault {
     }
 
     function attack() external payable {
-        vault.deposit{value: msg.value}();
+        vault.deposit{ value: msg.value }();
         vault.withdraw(msg.value);
     }
 

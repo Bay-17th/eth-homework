@@ -1,11 +1,13 @@
 # Week 3 퀴즈: EVM/Security patterns
 
 **제출 방법:**
+
 1. 이 파일을 복사하여 `quiz-03-solution.md`로 저장
 2. 각 문제에 답변 작성 (왜 그런지 설명 포함)
 3. Pull Request 생성 (`quiz_submission` 템플릿 사용)
 
 **평가 기준:**
+
 - 정답 여부보다 **개념 이해도**를 중점 평가합니다
 - 특히 **보안 취약점 식별과 방어 패턴**을 중점 평가합니다
 - 코드 문제는 문법보다 보안 논리를 평가합니다
@@ -23,9 +25,14 @@ C) 트랜잭션 처리 속도를 높이기 위해
 D) 개발자가 코드를 디버깅하기 쉽게 하기 위해
 
 **답변:**
+
 <!--
 정답과 함께, EVM에서 랜덤 함수나 외부 API 호출이 금지된 이유를 설명하세요.
 -->
+
+B
+현재 컴퓨터가 사용하고 있는 랜덤함수는 완벽한 랜덤함수가 아니다. 하드웨어의 상태 등을 고려하여 짜여진 랜덤함수는 실행되는 환경과 시각에 따라서 값이 변할 수 있지만, 그것은 결정론적인 특성상 입력값 대비 결과값이 같아야한다는 것에 위배되기 때문이다.
+API 호출을 금지한 이유는 네트워크 지연 등으로 인한 변수가 다른 값을 반환시킬 수 있기 때문이다. 이 또한 결정론의 특성을 위배하는 것이기 때문에 금지되었다.
 
 ---
 
@@ -35,11 +42,11 @@ D) 개발자가 코드를 디버깅하기 쉽게 하기 위해
 
 ```solidity
 function process(uint[] memory data) public pure returns (uint) {
-    uint sum = 0;
-    for (uint i = 0; i < data.length; i++) {
-        sum += data[i];
-    }
-    return sum;
+  uint sum = 0;
+  for (uint i = 0; i < data.length; i++) {
+    sum += data[i];
+  }
+  return sum;
 }
 ```
 
@@ -50,10 +57,16 @@ C) Stack에 저장되며 가장 비싼 저장 공간이다
 D) Calldata에 저장되며 수정이 가능하다
 
 **답변:**
+
 <!--
 정답과 함께, Storage/Memory/Stack의 비용 차이를 간단히 설명하세요.
 힌트: 어떤 것이 가장 비싸고, 왜 비싼가요?
 -->
+
+B 함수에서 호출되는 것은 기본적으로 memory에 저장되고 삭제된다.
+Storage : 영구적으로 저장되며 가스비용이 제일 비싸다. data가 blockchain에 저장되는 것이기 때문이다.
+Memory : 일시적으로 저장되며 가스비용은 중간 정도로 비싸다.
+Stack : 일시적으로 저장되며 가스비용이 제일 저렴하다. 하지만, 1024 levels 그리고 32bytes의 슬롯으로 제한된다.
 
 ---
 
@@ -68,11 +81,14 @@ C) SLOAD (Storage 읽기)
 D) SSTORE (Storage 쓰기)
 
 **답변:**
+
 <!--
 정답과 함께, 왜 Storage 관련 연산이 비싼지 설명하세요.
 힌트: Storage에 저장된 데이터는 어떤 특성이 있나요?
 -->
 
+D) SSTORE(Storage 쓰기) storage는 영구적으로 데이터가 저장된다.
+Storage에 저장된 데이터의 특성은 영구적 저장상태이다. 그렇기 때문에 가스비용이 더 많이 들 수밖에 없다.
 
 ---
 
@@ -83,6 +99,7 @@ D) SSTORE (Storage 쓰기)
 재진입 공격 시나리오와 연결해서 구체적으로 설명하세요.
 
 **답변:**
+
 <!--
 2-3 문장으로 설명하세요.
 힌트:
@@ -91,6 +108,8 @@ D) SSTORE (Storage 쓰기)
 - 상태가 변경되지 않은 상태라면 어떻게 될까요?
 -->
 
+외부에서 호출할 때 이미 상태가 업데이트 되기 전이라면 중복하여 외부 호출을 발생시킬 수 있다. 이런 상황에서는 나의 잔고가 변경(Effects)가 되지 않은 상태에서 호출되기 때문에 지속적인 출금이 발생할 수 있게 된다. 그래서 먼저 상태를 변경하고 그것을 바탕으로 나머지 외부호출을 하는 것이다!
+(차라리 transaction이 취소되는 게 더 나으니 먼저 상태변경하는 것이 더 나을지도..!)
 
 ---
 
@@ -101,13 +120,13 @@ D) SSTORE (Storage 쓰기)
 이 사건 이후 이더리움 생태계에 어떤 변화가 있었나요?
 
 **답변:**
+
 <!--
 2-3 문장으로 설명하세요.
 교훈:
 - 기술적 교훈 (코드 작성 관점)
 - 생태계 교훈 (이더리움 커뮤니티 관점)
 -->
-
 
 ---
 
@@ -118,43 +137,61 @@ D) SSTORE (Storage 쓰기)
 ```solidity
 // BAD CODE - 취약점 찾기
 contract VulnerableVault {
-    mapping(address => uint256) public balances;
+  mapping(address => uint256) public balances;
 
-    function deposit() public payable {
-        balances[msg.sender] += msg.value;
-    }
+  function deposit() public payable {
+    balances[msg.sender] += msg.value;
+  }
 
-    function withdraw(uint256 amount) public {
-        require(balances[msg.sender] >= amount, "Insufficient balance");
+  function withdraw(uint256 amount) public {
+    require(balances[msg.sender] >= amount, "Insufficient balance");
 
-        // ETH 전송
-        (bool success, ) = msg.sender.call{value: amount}("");
-        require(success, "Transfer failed");
+    // ETH 전송
+    (bool success, ) = msg.sender.call{ value: amount }("");
+    require(success, "Transfer failed");
 
-        // 잔액 차감
-        balances[msg.sender] -= amount;
-    }
+    // 잔액 차감
+    balances[msg.sender] -= amount;
+  }
 }
 ```
 
 **1) 발견한 취약점:**
+
 <!--
 취약점 이름과 위치를 명시하세요.
 힌트: withdraw 함수의 순서를 자세히 보세요.
 -->
 
+CEI패턴이 적용되지 않고 나중에 상태변화가 발생한다.
 
 **2) 왜 이것이 문제인가:**
+
 <!--
 공격자가 어떻게 이 취약점을 악용할 수 있는지 단계별로 설명하세요.
 -->
 
+Setup : fallback() 또는 receive() 함수를 이용하여 준비
+Initial Deposit : 처음에 1ETH를 deposit()을 통해 계정에 넣는다
+The First Withdrawal : 1ETH를 인출한다.
+Intercepting Control Flow : receive()함수가 발생하고, 1ETH를 입금 받기 전에 다시 한 번 함수를 호출한다.
+The Re-entry(The "Loop") : 공격자가 1ETH를 갖게 되었지만, balances[msg.sender] -= amount; 의 상태변화가 아직 일어나지 않았기 때문에 다시 한 번(계속) 호출한다.
+Recursive Draining : 공격자는 계속 withdraw를 실행한다(eth가 없어질 때까지). ETH를 계속 전달하고 balances[msg.sender] -= amount 는 도달할 수 없게 된다.
 
 **3) 올바른 수정 방법 (CEI 패턴):**
+
 ```solidity
 // GOOD CODE - CEI 패턴으로 수정하세요
 function withdraw(uint256 amount) public {
-    // 여기에 안전한 코드를 작성하세요
+  // 여기에 안전한 코드를 작성하세요
+  require(balances[msg.sender] >= amount, "Insufficient balance");
+
+  // 잔액 차감
+  balances[msg.sender] -= amount;
+
+  // ETH 전송
+  (bool success, ) = msg.sender.call{ value: amount }("");
+  require(success, "Transfer failed");
 }
 ```
 
@@ -166,28 +203,43 @@ function withdraw(uint256 amount) public {
 
 ```solidity
 function secureWithdraw(uint256 amount) public {
-    // 1. Checks - 조건 확인
-    require(______________________, "Insufficient balance");
+  // 1. Checks - 조건 확인
+  require(______________________, "Insufficient balance");
 
-    // 2. Effects - 상태 변경 (외부 호출 전에!)
-    ______________________;
+  // 2. Effects - 상태 변경 (외부 호출 전에!)
+  ______________________;
 
-    // 3. Interactions - 외부 호출 (마지막에!)
-    (bool success, ) = msg.sender.call{value: ______}("");
-    require(success, "Transfer failed");
+  // 3. Interactions - 외부 호출 (마지막에!)
+  (bool success, ) = msg.sender.call{ value: ______ }("");
+  require(success, "Transfer failed");
 }
 ```
 
 **답변:**
+
 ```solidity
 // 빈칸을 채운 완성 코드를 작성하세요
+function secureWithdraw(uint256 amount) public {
+  // 1. Checks - 조건 확인
+  require(balances[msg.sender] >= amount, "Insufficient balance");
+
+  // 2. Effects - 상태 변경 (외부 호출 전에!)
+  balances[msg.sender] -= amount;
+
+  // 3. Interactions - 외부 호출 (마지막에!)
+  (bool success, ) = msg.sender.call{ value: amount }("");
+  require(success, "Transfer failed");
+}
 ```
 
 **왜 이 순서가 중요한가요:**
+
 <!--
 CEI 순서가 재진입을 어떻게 방지하는지 설명하세요.
 -->
 
+외부 호출 이전에 내부 상태를 먼저 변경하도록 강제함으로써 재진입 공격을 방지한다.
+재진입하더라도 이미 상태가 갱신되어 있어 동일한 로직을 다시 실행할 수 없기 때문이다.
 
 ---
 
@@ -198,35 +250,50 @@ CEI 순서가 재진입을 어떻게 방지하는지 설명하세요.
 ```solidity
 // BAD CODE - 취약점 찾기
 contract PhishingVulnerable {
-    address public owner;
+  address public owner;
 
-    constructor() {
-        owner = msg.sender;
-    }
+  constructor() {
+    owner = msg.sender;
+  }
 
-    function transferOwnership(address newOwner) public {
-        require(tx.origin == owner, "Not owner");
-        owner = newOwner;
-    }
+  function transferOwnership(address newOwner) public {
+    require(tx.origin == owner, "Not owner");
+    owner = newOwner;
+  }
 }
 ```
 
 **1) 발견한 취약점:**
+
 <!--
 tx.origin과 msg.sender의 차이와 관련된 문제입니다.
 -->
 
+msg.sender : 직접적인 함수를 호출하는 주소
+tx.origin : 최초의 transaction을 실행시킨 EOA주소
+
+tx.origin의 취약점 - 모든 사람이 owner가 됨. 이 때문에 공격자가 다른 사용자의 계정을 통해 소유권을 이전할 수 있다.
+//소유자는 자신의 소유권을 포기하도록 속일 수 있다... 는 의미는 무엇인지 모르겠음,,
 
 **2) 공격 시나리오:**
+
 <!--
 공격자가 어떻게 이 취약점을 악용할 수 있나요?
 힌트: 공격자 컨트랙트를 통한 우회
 -->
 
+공격자가 AttackContract를 배포하고, owner를 피싱한다. 그 후 ownerShip을 변경하는 함수를 호출 -> tx.origin 의 함수를 통과하게 된다.
+owner가 attacker로 변경된다.
 
 **3) 올바른 수정 방법:**
+
 ```solidity
 // GOOD CODE - 수정된 코드를 작성하세요
+function transferOwnership(address newOwner) public {
+  require(msg.sender == owner, "Not owner");
+  require(newOwner != address(0), "Invalid address"); // 추가 안전장치
+  owner = newOwner;
+}
 ```
 
 ---
@@ -237,7 +304,7 @@ tx.origin과 msg.sender의 차이와 관련된 문제입니다.
 
 ```solidity
 // TODO: OpenZeppelin import
-______________________________________
+
 
 // TODO: 상속 추가
 contract SecureVault _________________ {
@@ -258,15 +325,37 @@ contract SecureVault _________________ {
 ```
 
 **답변:**
+
 ```solidity
 // 빈칸을 채운 완성 코드를 작성하세요
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+contract SecureVault is ReentrancyGuard {
+  mapping(address => uint256) public balances;
+
+  function deposit() public payable {
+    balances[msg.sender] += msg.value;
+  }
+
+  // TODO: modifier 추가
+  function withdraw(uint256 amount) public nonReentrant {
+    require(balances[msg.sender] >= amount, "Insufficient");
+    balances[msg.sender] -= amount;
+    (bool success, ) = msg.sender.call{ value: amount }("");
+    require(success, "Failed");
+  }
+}
 ```
 
 **CEI 패턴 vs ReentrancyGuard - 언제 무엇을 사용하나요:**
+
 <!--
 두 방법의 장단점을 설명하세요.
 -->
 
+|                 | 장점                                     | 단점                              |
+| --------------- | ---------------------------------------- | --------------------------------- |
+| CEI             | 가스 효율적 관리 가능, 외부 의존성 없음. | 개발자가 순서를 직접 관리해야 함. |
+| ReentrancyGuard | 실수 방지, 명시적, 검증된 코드           | 약간의 가스 오버헤드              |
 
 ---
 
@@ -296,39 +385,41 @@ sequenceDiagram
 **질문 1:** 6번에서 require 체크가 통과하는 이유는 무엇인가요?
 
 **답변:**
+
 <!--
 상태 변경(balances 차감)이 언제 일어나는지 확인하세요.
 -->
-
+상태 변경이 외부 호출 이후에 일어나기 때문이다. 그래서 외부 호출이 일어나기 전에는 여전히 잔액이 1 ETH로 남아있게 된다. 그래서 require 체크가 계속 통과하게 되는 것이다.
 
 **질문 2:** CEI 패턴을 적용하면 6번에서 어떻게 되나요?
 
 **답변:**
+
 <!--
 상태 변경 순서가 바뀌면 어떤 차이가 생기는지 설명하세요.
 -->
-
+외부 호출 전에 상태변경을 통해서 사전으로 잔액을 차감하게 되면, 상태가 변환되어 이미 호출된 것으로 판단하기 때문에 6번이 야기되지 않는다. 
 
 **질문 3:** 공격자가 총 몇 ETH를 탈취할 수 있나요? (예치금 1 ETH, Vault 총 잔액 10 ETH 가정)
 
 **답변:**
+
 <!--
 공격 시나리오를 수치로 분석해 보세요.
 -->
-
-
+공격자는 총 10 ETH를 탈취할 수 있다. 
 ---
 
 ## 자기 평가
 
 모든 문제를 풀었다면, 아래 체크리스트로 자기 평가를 해보세요:
 
-- [ ] EVM의 결정론적 실행 필요성을 이해했다
-- [ ] Storage/Memory/Stack의 차이와 비용을 알고 있다
-- [ ] 재진입 공격의 원리를 설명할 수 있다
-- [ ] CEI 패턴으로 재진입 공격을 방어할 수 있다
-- [ ] tx.origin vs msg.sender의 보안 차이를 알고 있다
-- [ ] ReentrancyGuard를 적용할 수 있다
+- [x] EVM의 결정론적 실행 필요성을 이해했다
+- [x] Storage/Memory/Stack의 차이와 비용을 알고 있다
+- [x] 재진입 공격의 원리를 설명할 수 있다
+- [x] CEI 패턴으로 재진입 공격을 방어할 수 있다
+- [x] tx.origin vs msg.sender의 보안 차이를 알고 있다
+- [x] ReentrancyGuard를 적용할 수 있다
 
 ---
 
