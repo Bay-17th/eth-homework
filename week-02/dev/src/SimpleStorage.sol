@@ -45,29 +45,17 @@ contract SimpleStorage {
     /// @notice ETH를 입금합니다
     /// @dev msg.value는 함수 호출 시 전송된 ETH 양입니다
     function deposit() public payable {
-        // TODO: 입금 로직을 구현하세요
-        // 1. balances[msg.sender]에 msg.value를 더합니다
-        // 2. Deposited 이벤트를 발생시킵니다
-        //
-        // 힌트:
-        // balances[msg.sender] += msg.value;
-        // emit Deposited(msg.sender, msg.value);
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender, msg.value);
     }
 
     /// @notice ETH를 출금합니다
     /// @param amount 출금할 금액 (wei 단위)
     /// @dev 잔액이 충분한지 확인 후, ETH를 전송합니다
     function withdraw(uint256 amount) public {
-        // TODO: 출금 로직을 구현하세요
-        // 1. 사용자의 잔액이 amount 이상인지 확인합니다 (require 사용)
-        // 2. balances[msg.sender]에서 amount를 뺍니다
-        // 3. msg.sender에게 ETH를 전송합니다
-        // 4. Withdrawn 이벤트를 발생시킵니다
-        //
-        // 힌트:
-        // require(balances[msg.sender] >= amount, "Insufficient balance");
-        // balances[msg.sender] -= amount;
-        // payable(msg.sender).transfer(amount);
-        // emit Withdrawn(msg.sender, amount);
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
+        emit Withdrawn(msg.sender, amount);
     }
 }
