@@ -82,7 +82,7 @@ contract VaultSecure {
 
     /// @dev 사용자별 예치금 잔액
     mapping(address => uint256) public balances;
-
+    bool private _withdrawing = false;
     // ============================================
     // 이벤트
     // ============================================
@@ -106,7 +106,8 @@ contract VaultSecure {
     ///
     /// 힌트: Vault.sol의 deposit()과 동일하게 구현하면 됩니다
     function deposit() public payable {
-        // TODO: 구현하세요
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender, msg.value);
     }
 
     /// @notice 예치한 ETH를 출금합니다
@@ -124,8 +125,22 @@ contract VaultSecure {
     ///
     /// CEI 패턴 사용 시 순서: Checks -> Effects -> Interactions
     /// ReentrancyGuard 사용 시: nonReentrant modifier 추가
+
     function withdraw(uint256 amount) public {
-        // TODO: 구현하세요
+        if (_withdrawing) return;
+        // 1. Checks
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+
+        // 2. Effects (상태를 먼저 변경)
+        balances[msg.sender] -= amount;
+
+        // 3. Interactions (외부 호출은 맨 마지막)
+        _withdrawing = true;
+        (bool success, ) = msg.sender.call{value: amount}("");
+        _withdrawing = false;
+
+        require(success, "Transfer failed");
+        emit Withdrawn(msg.sender, amount);
     }
 
     // ============================================
