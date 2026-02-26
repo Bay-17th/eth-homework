@@ -72,10 +72,10 @@ pragma solidity 0.8.26;
 // ============================================
 // OpenZeppelin 사용 시 주석 해제
 // ============================================
-// import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @dev ReentrancyGuard 사용 시: contract VaultSecure is ReentrancyGuard
-contract VaultSecure {
+contract VaultSecure is ReentrancyGuard {
     // ============================================
     // 상태 변수
     // ============================================
@@ -93,6 +93,11 @@ contract VaultSecure {
     /// @dev 출금 시 발생하는 이벤트
     event Withdrawn(address indexed user, uint256 amount);
 
+    // Silent reentrancy lock (return 방식)
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+    uint256 private _status = _NOT_ENTERED;
+
     // ============================================
     // 외부 함수
     // ============================================
@@ -105,8 +110,12 @@ contract VaultSecure {
     /// - Deposited 이벤트 발생
     ///
     /// 힌트: Vault.sol의 deposit()과 동일하게 구현하면 됩니다
-    function deposit() public payable {
-        // TODO: 구현하세요
+    function deposit() external payable {
+         // msg.value == 0을 막으라는 요구가 없으므로 가스비 절약을 위해 require 생략
+        unchecked {
+            balances[msg.sender] += msg.value;
+        }
+        emit Deposited(msg.sender, msg.value);
     }
 
     /// @notice 예치한 ETH를 출금합니다
@@ -124,17 +133,29 @@ contract VaultSecure {
     ///
     /// CEI 패턴 사용 시 순서: Checks -> Effects -> Interactions
     /// ReentrancyGuard 사용 시: nonReentrant modifier 추가
-    function withdraw(uint256 amount) public {
-        // TODO: 구현하세요
-    }
+    function withdraw(uint256 amount) external {
+    if (_status == _ENTERED) return;
+    _status = _ENTERED;
 
+    uint256 bal = balances[msg.sender];
+    require(bal >= amount, "Insufficient balance");
+
+    unchecked { balances[msg.sender] = bal - amount; }
+
+    (bool success, ) = payable(msg.sender).call{value: amount}("");
+    require(success, "Transfer failed");
+
+    emit Withdrawn(msg.sender, amount);
+
+    _status = _NOT_ENTERED;
+}
     // ============================================
     // View 함수
     // ============================================
 
     /// @notice Vault의 총 잔액을 반환합니다
     /// @return Vault 컨트랙트가 보유한 ETH 총량 (wei)
-    function getBalance() public view returns (uint256) {
+    function getBalance() external view returns (uint256) {
         return address(this).balance;
     }
 }

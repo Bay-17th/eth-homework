@@ -52,13 +52,15 @@ contract Attacker {
 
     /// @dev ETH를 받을 때 자동으로 호출되는 함수
     /// 재진입 공격의 핵심: 출금받을 때 다시 출금 시도
+    /// try/catch로 재진입 실패를 잡아서 receive() 자체는 정상 완료되도록 함
+    /// (revert 전파 방지: 재진입 revert → receive() revert → call 실패 → 첫 출금까지 롤백되는 것을 막음)
     receive() external payable {
         // 최대 5번까지 재진입 시도 (무한 루프 방지)
         // VaultSecure가 안전하다면 두 번째 withdraw()는 실패해야 함
         if (attackCount < 5 && address(vault).balance >= attackAmount) {
             attackCount++;
             console.log("Reentrancy attempt:", attackCount);
-            vault.withdraw(attackAmount);
+            try vault.withdraw(attackAmount) {} catch {}
         }
     }
 
@@ -310,10 +312,11 @@ contract VaultSecureTest is Test {
         );
 
         // Attacker는 자신이 입금한 1 ETH만 돌려받음
-        // 10 ETH (초기) - 1 ETH (입금) + 1 ETH (정상 출금) = 10 ETH
+        // 10 ETH (초기) + 1 ETH (테스트에서 받음) - 1 ETH (vault 입금) + 1 ETH (정상 출금) = 11 ETH
+        // 즉, vault에서 추가로 탈취한 ETH는 없음
         assertEq(
             address(attacker).balance,
-            attackerBalanceBefore,
+            attackerBalanceBefore + 1 ether,
             "Attacker should only get back their deposited amount"
         );
 
