@@ -212,8 +212,8 @@ forge test --match-test test_ReentrancyAttack_CannotDrainVault -vvvv
 
 과제 제출 전 확인하세요:
 
-- [ ] `deposit()` 함수 구현 완료
-- [ ] `withdraw()` 함수 구현 완료 (CEI 또는 ReentrancyGuard)
-- [ ] 모든 테스트 통과 (`forge test --match-path week-03/dev/test/Vault.t.sol`)
-- [ ] 특히 `test_ReentrancyAttack_CannotDrainVault` 통과
-- [ ] 코드에 적절한 주석 추가
+- [o] `deposit()` 함수 구현 완료
+- [o] `withdraw()` 함수 구현 완료 (CEI 또는 ReentrancyGuard)
+- [o] 모든 테스트 통과 (`forge test --match-path week-03/dev/test/Vault.t.sol`)
+- [o] 특히 `test_ReentrancyAttack_CannotDrainVault` 통과
+- [o] 코드에 적절한 주석 추가
